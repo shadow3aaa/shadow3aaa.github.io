@@ -29,9 +29,9 @@ params:
     displayTitle: true
     displayLogo: true
     logo:
-      path: /blog/favicon.svg
-      dark: /blog/favicon-dark.svg
-      link: /blog
+      path: /favicon.svg
+      dark: /favicon-dark.svg
+      link: /
       width: 40
       height: 40
 
@@ -41,7 +41,7 @@ params:
 
   editURL:
     enable: true
-    base: "https://github.com/shadow3aaa/blog/edit/main/content"
+    base: "https://github.com/shadow3aaa/shadow3aaa.github.io/edit/main/content"
 
 menu:
   main:
@@ -57,6 +57,6 @@ menu:
         type: search
     - name: GitHub
       weight: 4
-      url: "https://github.com/shadow3aaa/blog"
+      url: "https://github.com/shadow3aaa/shadow3aaa.github.io"
       params:
         icon: github
