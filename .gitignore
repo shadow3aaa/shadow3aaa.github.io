@@ -5,3 +5,7 @@ resources/
 
 # Editor
 .vscode/
+
+# Obsidian
+.obsidian/
+.trash/
