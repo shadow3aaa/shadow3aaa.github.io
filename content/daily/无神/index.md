@@ -6,5 +6,6 @@ draft: true
 ---
 
 > We are searching.
-> Following our human instincts
-> Looking for ghosts of the nn-existing-kind Who make us whole from the very beginning.
+> Following our human instincts.
+> Looking for ghosts of the none-existing-kind.
+> Who make us whole from the very beginning.
