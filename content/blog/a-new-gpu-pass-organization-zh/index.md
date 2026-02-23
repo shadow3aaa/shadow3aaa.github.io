@@ -1,13 +1,13 @@
 ---
-title: "Tessera 中一种全新的 GPU Pass 组织方法"
+title: Tessera 中一种全新的 GPU Pass 组织方法
 date: 2025-07-11T16:50:00+08:00
+slug: a-new-gpu-pass-organization-zh
 draft: false
-slug: "a-new-gpu-pass-organization-zh"
 ---
 
 不久前，我为我的个人 UI 库项目 [Tessera](https://github.com/shadow3aaa/tessera) 完成了一次核心渲染器的重构。这次重构旨在<!--more-->解决一个长期存在的痛点：如何原生、高效地支持需要多通道（Multi-Pass）渲染的复杂视觉效果。为此，我提出了一种与传统渲染图（Render Graph）不同的 GPU Pass 组织与管理方法。
 
-## 缘起：旧架构的瓶颈
+## 旧架构的瓶颈
 
 在重构之前，Tessera 的渲染架构依赖于一个简单的模型：每个组件（`ComponentNode`）最多只能关联一个可绘制对象（`basic_drawable`），它由一个 `Box<dyn DrawCommand>` trait object 表示，负责向渲染器提交具体的绘制指令。
 
@@ -15,9 +15,9 @@ slug: "a-new-gpu-pass-organization-zh"
 
 毛玻璃效果通常需要至少三个 Pass：
 
-1. **水平模糊 (Compute Pass)**：对背景纹理进行一次横向高斯模糊。
-2. **垂直模糊 (Compute Pass)**：对水平模糊的结果再进行一次纵向高斯模糊。
-3. **最终绘制 (Draw Pass)**：将两次模糊后的纹理绘制到屏幕上，并混合颜色、噪点等效果。
+1. \*\*水平模糊 (Compute Pass)\*\*：对背景纹理进行一次横向高斯模糊。
+2. \*\*垂直模糊 (Compute Pass)\*\*：对水平模糊的结果再进行一次纵向高斯模糊。
+3. \*\*最终绘制 (Draw Pass)\*\*：将两次模糊后的纹理绘制到屏幕上，并混合颜色、噪点等效果。
 
 在旧架构下，一个组件只能提交一个 `DrawCommand`，无法直接表达这种多 Pass 的依赖关系。为了绕过这个限制，我引入了一个名为 `RenderRequirement` 的枚举。
 
@@ -123,7 +123,7 @@ graph TD
     subgraph Renderer
         direction TB
         Loop(Process Command Stream sequentially);
-        
+
         subgraph "Inside Loop"
             direction TB
             Cmd{Read next command};
@@ -177,6 +177,7 @@ pub struct ComponentNodeMetaData {
 2. 遍历这个队列中的每一个 `Command`。
 3. **检查屏障**：在执行命令前，检查其 `barrier()` 方法。如果需要屏障，则交换读写缓冲区（Ping-pong Buffers），并将当前读取缓冲区的内容复制到写入缓冲区，为接下来的采样做准备。
 4. **分发命令**：
+
     - 如果是 `Command::Draw`，则在一个 `RenderPass` 中执行。为了优化性能，渲染器会尽可能地将连续的、无屏障的 `DrawCommand` 合并到同一个 `RenderPass` 中执行。
     - 如果是 `Command::Compute`，则在一个 `ComputePass` 中执行，同样会合并连续的计算指令。
 
@@ -221,9 +222,7 @@ pub fn fluid_glass(args: FluidGlassArgs) {
 尽管渲染图功能强大，但我最终选择了更轻量、更线性的统一命令系统。这主要基于 Tessera 作为一个 UI 库的特定场景和设计哲学：
 
 1. **心智模型的简单性**：对于 UI 组件的开发者来说，最直观的思考方式是“先做什么，后做什么”。我的命令系统完美地映射了这种线性的、命令式的思维。开发者只需按顺序 `push` 命令，就能精确控制渲染流程。而渲染图则要求开发者将思维切换到声明式的图节点和资源依赖，这引入了额外的认知开销，对于 UI 场景来说可能是一种不必要的复杂化。
-
 2. **UI 渲染的线性特质**：一个复杂的游戏场景可能拥有庞大且动态变化的渲染图，需要复杂的调度优化。相比之下，UI 的渲染流程通常是相对固定的、线性的“堆叠”模式（A 在 B 之上，B 在 C 之上）。即使是多 Pass 的毛玻璃效果，其依赖关系也是一条直线。一个轻量级的线性命令队列足以高效地处理这种情况，而引入完整的图结构颇有“杀鸡用牛刀”之嫌。
-
 3. **避免过度工程化**：一个功能完备的渲染图需要实现图的构建、编译、资源生命周期管理、内存混叠等复杂功能。对于 Tessera 目前的阶段和需求，这是一个巨大的工程负担。我的命令系统以最小的复杂性，精准地解决了多 Pass 依赖管理这个核心痛点，实现了“刚刚好”的设计。
 
 总而言之，我的统一命令系统可以看作是一种“**特化且简化的渲染图**”。它借鉴了渲染图自动管理屏障的核心思想，但将其适配到了 UI 渲染的线性、命令式场景中，从而在解决问题的同时，保持了架构的轻量和开发者心智模型的简单。
