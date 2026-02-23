@@ -1,0 +1,101 @@
+# Decap CMS configuration
+# Docs:
+# - https://decapcms.org/docs/intro/
+# - https://decapcms.org/docs/github-backend/
+
+backend:
+  name: github
+  repo: shadow3aaa/shadow3aaa.github.io
+  branch: main
+  base_url: https://blog-editor.shadow3aaaa.workers.dev
+  auth_endpoint: auth
+
+site_url: https://shadow3aaa.github.io
+display_url: https://shadow3aaa.github.io
+locale: zh_Hans
+
+publish_mode: simple
+local_backend: true
+
+media_folder: static/images/uploads
+public_folder: /images/uploads
+
+collections:
+  - name: blog
+    label: Blog
+    label_singular: Post
+    folder: content/blog
+    create: true
+    delete: true
+    path: "{{slug}}/index"
+    # Store uploaded images beside index.md in each post bundle.
+    media_folder: ""
+    public_folder: ""
+    preview_path: "blog/{{slug}}"
+    extension: md
+    format: frontmatter
+    editor:
+      preview: false
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Date
+        name: date
+        widget: datetime
+        format: YYYY-MM-DDTHH:mm:ssZ
+        date_format: YYYY-MM-DD
+        time_format: HH:mm:ss
+        picker_utc: false
+      - label: Slug
+        name: slug
+        widget: string
+        required: false
+        hint: URL path segment, recommended kebab-case.
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+      - label: Body
+        name: body
+        widget: markdown
+  - name: daily
+    label: Daily
+    label_singular: Entry
+    folder: content/daily
+    create: true
+    delete: true
+    path: "{{slug}}/index"
+    # Store uploaded images beside index.md in each daily bundle.
+    media_folder: ""
+    public_folder: ""
+    preview_path: "daily/{{slug}}"
+    extension: md
+    format: frontmatter
+    editor:
+      preview: false
+    fields:
+      - label: Title
+        name: title
+        widget: string
+      - label: Date
+        name: date
+        widget: datetime
+        format: YYYY-MM-DDTHH:mm:ssZ
+        date_format: YYYY-MM-DD
+        time_format: HH:mm:ss
+        picker_utc: false
+      - label: Slug
+        name: slug
+        widget: string
+        required: false
+        hint: URL path segment, recommended kebab-case.
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+      - label: Body
+        name: body
+        widget: markdown
