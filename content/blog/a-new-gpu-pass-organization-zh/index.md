@@ -1,7 +1,7 @@
 ---
 title: Tessera 中一种全新的 GPU Pass 组织方法
 date: 2025-07-11T16:50:00+08:00
-slug: a-new-gpu-pass-organization-zh
+slug: a-new-gpu-pass-organization
 draft: false
 ---
 
