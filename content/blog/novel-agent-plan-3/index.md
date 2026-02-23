@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(三): 关系图检索"
 date: 2025-09-26T18:09:00+08:00
+slug: "novel-agent-plan-3"
 ---
 
 {{< callout icon="sparkles" >}}

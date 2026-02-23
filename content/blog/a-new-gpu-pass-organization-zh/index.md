@@ -2,6 +2,7 @@
 title: "Tessera 中一种全新的 GPU Pass 组织方法"
 date: 2025-07-11T16:50:00+08:00
 draft: false
+slug: "a-new-gpu-pass-organization-zh"
 ---
 
 不久前，我为我的个人 UI 库项目 [Tessera](https://github.com/shadow3aaa/tessera) 完成了一次核心渲染器的重构。这次重构旨在<!--more-->解决一个长期存在的痛点：如何原生、高效地支持需要多通道（Multi-Pass）渲染的复杂视觉效果。为此，我提出了一种与传统渲染图（Render Graph）不同的 GPU Pass 组织与管理方法。

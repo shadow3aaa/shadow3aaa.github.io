@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(一)"
 date: 2025-09-25T15:34:00+08:00
+slug: "novel-agent-plan-1"
 ---
 
 {{< callout icon="sparkles" >}}

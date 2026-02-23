@@ -2,6 +2,7 @@
 title: 为 Asus 笔记本添加 PID 风扇控制
 date: 2025-06-30
 math: true
+slug: "ghelper-fan-plugin-system-dev-log"
 ---
 
 正值夏日，AMD 酷热难当，好似室内暖机，惹得风扇轰鸣。

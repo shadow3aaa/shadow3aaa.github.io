@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(四): agent流程设计"
 date: 2025-09-27T11:33:00+08:00
+slug: "novel-agent-plan-4"
 ---
 
 {{< callout icon="sparkles" >}}

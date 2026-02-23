@@ -1,6 +1,7 @@
 ---
 title: 在Rust中做类型擦除的动态分发
 date: 2025-06-26
+slug: "dynamic-dispatch-in-rust"
 ---
 
 ## 起因

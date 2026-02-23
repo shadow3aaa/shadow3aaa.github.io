@@ -1,6 +1,7 @@
 ---
 title: 新的 remember 特性
 date: 2025-12-15T16:56:00+08:00
+slug: "new-remember-feature"
 ---
 
 tessera v3的其中一个重要目标是引入remember机制，让tessera真正拥有带状态组件，避免传统即时模式ui的无条件状态提升问题。

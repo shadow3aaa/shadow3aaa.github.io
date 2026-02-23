@@ -1,6 +1,7 @@
 ---
 title: Rust GUI in mid-2025
 date: 2025-06-26
+slug: "rust-gui-in-2025-mid"
 ---
 
 ## 对比2024

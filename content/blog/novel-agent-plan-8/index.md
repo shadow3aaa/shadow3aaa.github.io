@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(八): 章节写作 (Chapter Writing)"
 date: 2025-10-03T11:25:00+08:00
+slug: "novel-agent-plan-8"
 ---
 
 {{< callout icon="sparkles" >}}

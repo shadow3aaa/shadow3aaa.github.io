@@ -2,6 +2,7 @@
 title: "为强迫症准备的rust导入格式脚本"
 date: 2025-07-15T01:05:00+08:00
 draft: false
+slug: "rust-script-to-format-use-imports-for-the-aesthetically-obsessed"
 ---
 
 ## 恼人的格式化

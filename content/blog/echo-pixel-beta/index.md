@@ -1,6 +1,7 @@
 ---
 title: "EchoPixel: 一个无需服务端的webdav跨平台相册"
 date: 2025-05-30
+slug: "echo-pixel-beta"
 ---
 
 ⚠️ **WARNING** ⚠️:  

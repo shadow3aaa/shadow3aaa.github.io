@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(二): 实现关系图"
 date: 2025-09-25T18:09:00+08:00
+slug: "novel-agent-plan-2"
 ---
 
 {{< callout icon="sparkles" >}}

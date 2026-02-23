@@ -1,6 +1,7 @@
 ---
 title: "Tessera UI v2.0.0"
 date: 2025-09-17T18:05:00+08:00
+slug: "tessera-ui-v2-0-0-release"
 ---
 
 Tessera UI 是一个基于 Rust 和 wgpu 的，gpu 优先的即时模式 UI 框架。<!--more-->

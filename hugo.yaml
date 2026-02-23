@@ -46,7 +46,7 @@ params:
 menu:
   main:
     - name: Blog
-      pageRef: /
+      pageRef: /blog
       weight: 1
     - name: Contact ↗
       url: "https://github.com/shadow3aaa"

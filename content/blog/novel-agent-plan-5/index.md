@@ -1,6 +1,7 @@
 ---
 title: "小说Agent计划(五): 大纲设计阶段 (Outline Design)"
 date: 2025-09-28T16:15:00+08:00
+slug: "novel-agent-plan-5"
 ---
 
 {{< callout icon="sparkles" >}}
