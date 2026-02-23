@@ -15,7 +15,6 @@ display_url: https://shadow3aaa.github.io
 locale: zh_Hans
 
 publish_mode: simple
-local_backend: true
 
 media_folder: static/images/uploads
 public_folder: /images/uploads
