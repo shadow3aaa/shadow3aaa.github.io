@@ -51,12 +51,12 @@
                 {{- $entry := strings.TrimPrefix "blog/" $path -}}
                 {{- $entry = strings.TrimSuffix "/index.md" $entry -}}
                 {{- $entry = strings.TrimSuffix ".md" $entry -}}
-                {{- $editURL = printf "%s/#/collections/blog/entries/%s" $cmsRoot $entry -}}
+                {{- $editURL = printf "%s/#/collections/blog/entries/%s/index" $cmsRoot $entry -}}
               {{- else if hasPrefix $path "daily/" -}}
                 {{- $entry := strings.TrimPrefix "daily/" $path -}}
                 {{- $entry = strings.TrimSuffix "/index.md" $entry -}}
                 {{- $entry = strings.TrimSuffix ".md" $entry -}}
-                {{- $editURL = printf "%s/#/collections/daily/entries/%s" $cmsRoot $entry -}}
+                {{- $editURL = printf "%s/#/collections/daily/entries/%s/index" $cmsRoot $entry -}}
               {{- end -}}
             {{- end -}}
           {{- end -}}
