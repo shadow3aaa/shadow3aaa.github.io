@@ -34,7 +34,7 @@ collections:
     extension: md
     format: frontmatter
     editor:
-      preview: false
+      preview: true
     fields:
       - label: Title
         name: title
@@ -73,7 +73,7 @@ collections:
     extension: md
     format: frontmatter
     editor:
-      preview: false
+      preview: true
     fields:
       - label: Title
         name: title

@@ -8,5 +8,56 @@
   </head>
   <body>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "loose",
+        theme: "default",
+      });
+
+      const scheduleMermaidRender = (() => {
+        let queued = false;
+
+        return () => {
+          if (queued) return;
+          queued = true;
+
+          requestAnimationFrame(async () => {
+            queued = false;
+
+            const previews = document.querySelectorAll(
+              "pre > code.language-mermaid, pre > code.lang-mermaid, pre > code[class*='language-mermaid']"
+            );
+            if (previews.length === 0) return;
+
+            for (const code of previews) {
+              const pre = code.closest("pre");
+              if (!pre) continue;
+              if (pre.dataset.mermaidProcessed === "true") continue;
+
+              const chart = document.createElement("div");
+              chart.className = "mermaid";
+              chart.textContent = code.textContent || "";
+
+              pre.dataset.mermaidProcessed = "true";
+              pre.replaceWith(chart);
+            }
+
+            try {
+              await mermaid.run({ querySelector: ".mermaid" });
+            } catch (err) {
+              console.error("Failed to render Mermaid in Sveltia CMS preview:", err);
+            }
+          });
+        };
+      })();
+
+      const previewObserver = new MutationObserver(scheduleMermaidRender);
+      previewObserver.observe(document.body, { childList: true, subtree: true });
+
+      scheduleMermaidRender();
+    </script>
   </body>
 </html>
