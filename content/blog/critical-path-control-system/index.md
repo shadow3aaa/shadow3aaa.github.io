@@ -20,3 +20,22 @@ CPCS，即Critical-Path Control System，是FAS(Frame Aware Scheduling)的补充
 没有人可以未卜先知，因此无法在本帧执行之前就得知本帧的关键线程路径是什么。所以，CPCS有效的前提是游戏帧的行为**高度重复。**如果这点成立，就可以用之前帧的关键路径预测本帧的关键路径。这就是POC-0要验证的目标。
 
 根据我之前（[shadow3aaa/frame-analyzer-ebpf](https://github.com/shadow3aaa/frame-analyzer-ebpf)）的经历，ebpf的编写和使用堪称折磨，即使是使用了aya-rs这种高度简化构建流程的框架。所幸我可以让codex帮我完成poc的编写，只需要抄之前的代码即可。
+
+POC-0的结构如下。
+
+```mermaid
+flowchart TD
+    subgraph Kernel
+        A[Ebpf Event] -->|FramePoint uprobe| B{是否结束一帧}
+        A -->|sched_wakeup| B
+        A -->|sched_switch| B
+        B -- 未结束 --> A
+    end
+
+    subgraph UserSpace
+        B -- 结束 --> D[统计<br/>per-tid exec/rq_delay/wakeups/switches]
+        D --> E[使用 Jaccard 对此上帧数据进行分析]
+        E --> F[记录]
+        E --> A
+    end
+```
