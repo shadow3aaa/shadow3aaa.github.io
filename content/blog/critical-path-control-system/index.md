@@ -39,3 +39,23 @@ flowchart TD
         E --> A
     end
 ```
+
+测试了一些游戏，将对比两帧的top-k（score = exec_ns + rq_delay_ns）线程集合的数据整理为csv，得到下面这个不错的图表。
+
+![游戏：元气骑士](jaccard.png)
+
+下面是平滑后的结果
+
+![平滑后的Jaccard曲线图](jaccard_smooth.png)
+
+除了曲线图以外，其它一些统计数据如下
+
+- count: 2756
+- mean: 0.83295
+- p25: 0.77778
+- p75: 1.0
+- p90: 1.0
+- min: 0.06667
+- max: 1.0
+
+可以看到Jaccard ≈ 0.78–1.00，POC-0要验证的目标基本成立。
