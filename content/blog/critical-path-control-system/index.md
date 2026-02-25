@@ -25,37 +25,28 @@ POC的结构如下。
 
 ```mermaid
 flowchart TD
-    subgraph Kernel
-        A[Ebpf Event] --> B{是否结束一帧}
-        B -- 未结束 --> A
-    end
+      subgraph Kernel[eBPF / Kernel]
+          K1[Emit Event Packet]
+      end
 
-    subgraph UserSpace
-        B -- 结束 --> D[统计<br/>per-tid exec/rq_delay/wakeups/switches]
-        D --> E[对比上帧数据进行分析]
-        E --> F[记录]
-        F --> A
-    end
+      subgraph UserSpace[Analyzer / User Space]
+          K1 --> U1[接收事件流]
+          U1 --> U2{frame_point?}
+
+          U2 -- 否 --> U3[写入当前帧桶]
+          U3 --> U4[更新关联状态<br/>pending_wait / latest_wake / wakeup->running]
+          U4 --> U1
+
+          U2 -- 是 --> U5[分析上帧数据]
+          U5 --> U6[构建关系图<br/>futex边 + sched边]
+          U6 --> U7[记录关键依赖链]
+          U7 --> U8[开始下一帧]
+          U8 --> U1
+      end
 ```
 
-测试了一些游戏，将对比两帧的top-k（score = exec_ns + rq_delay_ns）线程集合的数据整理为csv，得到下面这个不错的图表。
+测试了游戏场景，得到下面这个dag图。红色即关键路径。
 
-![游戏：元气骑士](jaccard.png)
+![线程依赖图](cpcs_overlay.png)
 
-下面是平滑后的结果
-
-![平滑后的Jaccard曲线图](jaccard_smooth.png)
-
-除了曲线图以外，其它一些统计数据如下
-
-- count: 2756
-- mean: 0.83295
-- p25: 0.77778
-- p75: 1.0
-- p90: 1.0
-- min: 0.06667
-- max: 1.0
-
-可以看到Jaccard ≈ 0.78–1.00，POC-0要验证的目标基本成立。
-
-## POC-1
+可以看到从线程(tid3575)开始的红色路径是相对集中的。因此确实有可行性。
