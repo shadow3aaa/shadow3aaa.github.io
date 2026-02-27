@@ -114,7 +114,6 @@ futex 等待时间和调度等待时间参与决定关键路径，但它们本�
 ```mermaid
 flowchart LR
 
-%% ===== FAS 控制回路 =====
 subgraph FAS["Frame-Aware Scheduler (FAS)"]
 direction LR
 
@@ -134,7 +133,6 @@ direction LR
     F -. 下一帧 .-> A
 end
 
-%% ===== CPCS 分析系统 =====
 subgraph CPCS["Critical-Path Control System (CPCS)"]
 direction TB
 
@@ -162,7 +160,6 @@ direction TB
     end
 end
 
-%% ===== 系统接口（弱耦合反馈）=====
 O1 -. 调整策略 .-> E
 ```
 
