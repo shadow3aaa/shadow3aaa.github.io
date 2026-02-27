@@ -5,7 +5,7 @@ slug: critical-path-control-system
 draft: false
 ---
 
-本文首次提出并定义 CPCS（Critical-Path Control System），一种以帧关键路径为核心信号，用于指导性能预算在多集簇系统中分配的控制系统思想。
+本文首次提出并定义 CPCS（Critical-Path Control System），一种以帧关键路径为核心，用于指导性能预算在多集簇系统中分配的控制系统思想。
 
 <!--more-->
 
