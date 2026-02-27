@@ -105,11 +105,66 @@ futex 等待时间和调度等待时间参与决定关键路径，但它们本�
 - 计算量固定假设：关键路径上的线程不是贪婪地抢占cpu时间，只是需要固定的计算量
 - 边际收益最大化假设：在计算量固定假设的前提下，执行时间与 cpu 频率近似成反比。因此，执行时间越长的节点，其所在集簇的频率提升所能带来的帧长度收益越大。
 
-因此，可以将关键路径上各线程在其所属 cpu 集簇上的执行时间作为权重，将 FAS 闭环控制得到的总性能预算分配到各个集簇。
+因此，将关键路径上各线程在其所属 cpu 集簇上的执行时间作为权重，将 FAS 闭环控制得到的总性能预算分配到各个集簇是一个很合理的方向。
 
 ## 工程实践
 
-基于以上实验和思想，我将CPCS探索性集成到我个人的FAS实现[fas-rs](https://github.com/shadow3aaa/fas-rs)。目前仍在探索具体参数中。这里暂不展示具体的表现和代码实现。
+基于以上实验和思想，我将CPCS探索性集成到我个人的FAS实现[fas-rs](https://github.com/shadow3aaa/fas-rs)未公开的分支中。目前仍在探索具体参数，这里暂不展示具体的表现和代码实现，大体的架构如下。
+
+```mermaid
+flowchart LR
+
+%% ===== FAS 控制回路 =====
+subgraph FAS["Frame-Aware Scheduler (FAS)"]
+direction LR
+
+    Start((Frame Start))
+    Start --> A[获取帧生成时间]
+
+    A --> B{是否超过目标帧时间}
+    B -- 是 --> C[降低性能]
+    B -- 否 --> D[增加性能]
+
+    C --> E[性能预算 Δ]
+    D --> E[性能预算 Δ]
+
+    E --> F[应用新的性能预算到 CPU]
+
+    %% 语义回路（虚线，避免强环）
+    F -. 下一帧 .-> A
+end
+
+%% ===== CPCS 分析系统 =====
+subgraph CPCS["Critical-Path Control System (CPCS)"]
+direction TB
+
+    subgraph Kernel["eBPF / Kernel"]
+    direction TB
+        K1[Emit Event Packet]
+    end
+
+    subgraph UserSpace["Analyzer / User Space"]
+    direction TB
+
+        K1 --> U1[接收事件流]
+        U1 --> U2{frame_point?}
+
+        U2 -- 否 --> U3[写入当前帧桶]
+        U3 --> U4[更新关联状态]
+        U4 -. 循环 .-> U1
+
+        U2 -- 是 --> U5[分析上帧数据]
+        U5 --> U6[构建关系图]
+        U6 --> U7[记录关键依赖链]
+
+        U7 --> O1[输出：集簇权重 / 关键链特征]
+        O1 -. 继续采集 .-> U1
+    end
+end
+
+%% ===== 系统接口（弱耦合反馈）=====
+O1 -. 调整策略 .-> E
+```
 
 ## 局限
 
