@@ -1,7 +1,7 @@
 ---
 title: Critical-Path Control System
 date: 2026-02-25T19:46:00+08:00
-slug: the-critical-path-control-system
+slug: critical-path-control-system
 draft: false
 ---
 
