@@ -21,7 +21,7 @@ CPCS，即Critical-Path Control System，是FAS(Frame Aware Scheduling)的补充
 
 根据我之前（[shadow3aaa/frame-analyzer-ebpf](https://github.com/shadow3aaa/frame-analyzer-ebpf)）的经历，ebpf的编写和使用堪称折磨，即使是使用了aya-rs这种高度简化构建流程的框架。所幸我可以让codex帮我完成poc程序的编写，只需要抄frame-analyzer的代码即可。
 
-POC的结构如下。
+CPCS-POC的结构如下。
 
 ```mermaid
 flowchart TD
@@ -34,11 +34,11 @@ flowchart TD
           U1 --> U2{frame_point?}
 
           U2 -- 否 --> U3[写入当前帧桶]
-          U3 --> U4[更新关联状态<br/>pending_wait / latest_wake / wakeup->running]
+          U3 --> U4[更新关联状态]
           U4 --> U1
 
           U2 -- 是 --> U5[分析上帧数据]
-          U5 --> U6[构建关系图<br/>futex边 + sched边]
+          U5 --> U6[构建关系图]
           U6 --> U7[记录关键依赖链]
           U7 --> U8[开始下一帧]
           U8 --> U1
@@ -76,3 +76,9 @@ FAS能得到的只有一个抽象的性能预算，而不是直接的cpu目标�
 这导致一个问题：瓶颈集簇以外的cpu集簇被不必要的拉高频率。
 
 因为FAS只能得知总体的帧时间超时，而无法得知是哪个cpu核心的性能不足。
+
+## CPCS权重分配
+
+根据木桶效应，关键路径上的线程就是对帧生成时间真正有决定性影响的线程。
+
+CPCS可以分析关键路径，所以它可以解决FAS看不到具体是哪些线程对帧生成时间影响最大的问题。
