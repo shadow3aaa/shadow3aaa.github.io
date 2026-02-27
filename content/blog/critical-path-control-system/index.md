@@ -2,7 +2,7 @@
 title: Critical-Path Control System
 date: 2026-02-25T19:46:00+08:00
 slug: the-critical-path-control-system
-draft: true
+draft: false
 ---
 
 本文首次提出并定义 CPCS（Critical-Path Control System），一种以帧关键路径为核心信号，用于指导性能预算在多集簇系统中分配的控制系统思想。
