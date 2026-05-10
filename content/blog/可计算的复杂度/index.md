@@ -13,7 +13,7 @@ draft: true
 
 为此，本文提出SCOPE (Semantic Code Operation & Propagation Engine)来缓解此问题。
 
-## 错误的根源
+## **错误的根源：两层不对齐**
 
 我认为，vibe coding目前有两层不对齐问题，它们共同导致了工程走向劣化。
 
