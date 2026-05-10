@@ -1,7 +1,7 @@
 ---
 title: 'SCOPE: Semantic Code Operation & Propagation Engine'
 date: 2026-05-10T22:28:00+08:00
-slug: ''
+slug: semantic-code-engine
 draft: true
 ---
 
