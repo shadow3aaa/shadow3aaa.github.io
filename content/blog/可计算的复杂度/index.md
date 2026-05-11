@@ -91,3 +91,75 @@ Agent 通过正则或语义搜索定位到了 acquire 函数。敏锐地理解�
 结果就是：每次分配失败，都会导致 active_conns 计数器永久性 +1（状态泄漏）。运行一段时间后，活跃连接数会被虚假的失败请求占满，整个系统陷入死锁，再也无法处理新请求。
 
 ## SCOPE: 消除空隙的引擎
+
+SCOPE的核心是一个事件队列。
+
+```mermaid
+graph LR
+    subgraph Event Queue
+        direction LR
+        E1[Event 1] --> E2[Event 2] --> E3[...] --> EN[Event N]
+    end
+```
+
+首先，将用户的修改意图作为第一个事件推入队列首部。
+
+```mermaid
+graph TD
+    User((User)) -->|push intent<br/>as first event| Queue[Event Queue]
+```
+
+然后开始循环从队列首部弹出并处理事件。第一个事件让agent根据初始的修改意图搜索并修改代码库。
+
+```mermaid
+graph TD
+    Queue[Event Queue] -->|pop head| Agent[Agent]
+    Agent -->|read / search / edit / delete| Codebase[(Codebase)]
+```
+
+为此，SCOPE提供五个工具:
+
+- read_code(selector)
+- edit_code(selector, patch_v4a)
+- delete_code(selector)：独立工具，单独传播规则。
+- search_code(query)
+- ack_next_event()
+
+每当编辑工具被调用时，SCOPE内部的传播分析引擎（基于tree sitter & lsp）就会分析出影响的代码范围，并基于修改的selector暂存它们。
+
+```mermaid
+graph TD
+    Edit["edit_code / delete_code"] --> Engine[Propagation Engine<br/>tree-sitter & LSP]
+    Engine -->|affected selectors + ranges| Store[(Temporary Store)]
+```
+
+agent完成事件后，将会调用`ack_next_event` 表明此事件完成，请求下个事件。此时之前暂存的修改传播经过去重处理后，会以selector为id整合为多个ReviewEvent进入队尾。
+
+```mermaid
+graph TD
+    Store[(Temporary Store)] -->|dedup + group by selector| Dedup[Dedup & Group]
+    Dedup -->|ReviewEvents| Queue["Event Queue<br/>(append to tail)"]
+```
+
+因此agent得到的下个事件就会是审查某个修改的影响范围，如果它发现问题并进行修改，就会产生新的ReviewEvent。反复这个过程直到清空队列。
+
+下面是整个流程的时序图：
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant E as SCOPE Engine<br/>(Queue & Propagation)
+    participant A as Agent
+
+    U->>E: 推入初始修改意图事件(队首)
+    E->>A: 弹出事件 (首次为初始意图)
+    loop 队列非空期间
+        A->>E: 调用工具 (read_code / search_code / edit_code / delete_code)
+        alt 编辑类工具 (edit_code / delete_code)
+            E->>E: 传播分析引擎分析影响范围，基于 selector 暂存受影响代码
+        end
+        A->>E: ack_next_event() （表明事件完成，请求下一个事件）
+        E->>E: 去重暂存传播 → 按 selector 生成 ReviewEvent → 推入队尾
+        E->>A: 弹出下一个事件 (ReviewEvent)
+    end
+```
