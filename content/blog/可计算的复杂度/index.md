@@ -2,7 +2,7 @@
 title: 'SCOPE: Semantic Code Operation & Propagation Engine'
 date: 2026-05-10T22:28:00+08:00
 slug: semantic-code-engine
-draft: true
+draft: false
 ---
 
 在vibe coding越来越流行的今天，很多拥抱coding agent的项目都面临着同样的问题：明明引入了外部智能体来代理完成项目，却反而导致项目越改越乱。
