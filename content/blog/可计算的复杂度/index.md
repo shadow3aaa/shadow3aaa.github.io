@@ -27,68 +27,76 @@ draft: false
 
 或者，如果模型能力过弱，直接无法理解人类的逻辑模型，也会导致这种情况，不过这不是工程上可以解决的问题，这里不讨论。
 
-**agent和代码的不对齐**来自于编写工作流本身。假设我们有一个手动管理状态的连接池（这在不方便使用 RAII 的异步状态机或底层 FFI 交互中很常见）：
+**agent和代码的不对齐**来自于编写工作流本身。假设我们有一个采用预扣模式的速率限制器，配合业务错误时需要回滚的协议（这类设计在细粒度资源控制中很常见）：
 
 ```rust
-// connection_pool.rs
-pub struct ConnectionPool {
-    active_conns: usize,
-    max_limit: usize,
+// rate_limiter.rs
+pub struct RateLimiter {
+    tokens: i32,
+    max_tokens: i32,
 }
 
-impl ConnectionPool {
-    /// 获取连接 ID
-    pub fn acquire(&mut self) -> Result<u32, Error> {
-        if self.active_conns >= self.max_limit { 
-            return Err(Error::Busy); 
+impl RateLimiter {
+    /// 预扣一个令牌，若成功则返回 true，否则返回 false
+    pub fn check_limit(&mut self) -> bool {
+        if self.tokens > 0 {
+            self.tokens -= 1;
+            true
+        } else {
+            false
         }
-        
-        // 增加计数，并分配底层资源
-        self.active_conns += 1;
-        let conn_id = unsafe { ffi_allocate_connection() };
-        
-        Ok(conn_id)
     }
 
-    /// 释放连接 ID
-    pub fn release(&mut self, conn_id: u32) {
-        unsafe { ffi_free_connection(conn_id); }
-        if self.active_conns > 0 {
-            self.active_conns -= 1;
+    /// 回滚一个令牌（当请求未实际消耗资源时调用）
+    pub fn rollback_limit(&mut self) {
+        if self.tokens < self.max_tokens {
+            self.tokens += 1;
         }
     }
 }
 ```
 
-现在，人类提出: “连接时，加一个自检逻辑：如果底层的底层分配失败，请直接返回SystemError，不要把无效的 ID 返回给外部调用方。”
+```rust
+// api_handler.rs
+use crate::rate_limiter::RateLimiter;
 
-Agent 通过正则或语义搜索定位到了 acquire 函数。敏锐地理解了人类的要求，并在局部做出了看起来极其完美的修改：
+pub fn handle_request(limiter: &mut RateLimiter, user_id: u64) -> Result<Response, Error> {
+    // 业务前置检查
+    if !user_exists(user_id) {
+        return Err(Error::UserNotFound);
+    }
+    
+    // 核心处理
+    let data = fetch_data(user_id)?;
+    Ok(Response::new(data))
+}
+```
+
+现在，人类提出：“在 API 处理入口加入速率限制，若令牌不足则直接返回 429。”
+
+Agent 通过语义搜索定位到了 `handle_request` 函数。它迅速理解了人类的要求，并在局部做出了看似极其完美的修改：
 
 ```diff
---- a/src/connection_pool.rs
-+++ b/src/connection_pool.rs
-@@ -5,9 +5,14 @@
-         if self.active_conns >= self.max_limit { 
-             return Err(Error::Busy); 
-         }
-         
-         self.active_conns += 1;
-         let conn_id = unsafe { ffi_allocate_connection() };
-         
-+        // Agent 增加的自检与拦截逻辑
-+        if conn_id == 0 {
-+            return Err(Error::SystemError);
-+        }
+--- a/src/api_handler.rs
++++ b/src/api_handler.rs
+@@ -1,6 +1,11 @@
+ pub fn handle_request(limiter: &mut RateLimiter, user_id: u64) -> Result<Response, Error> {
++    // Agent 添加的速率限制检查
++    if !limiter.check_limit() {
++        return Err(Error::RateLimited);
++    }
 +
-         Ok(conn_id)
+     // 业务前置检查
+     if !user_exists(user_id) {
+         return Err(Error::UserNotFound);
      }
 ```
 
-​这段代码编译完全通过，且非常符合人类直觉（拿到无效 ID 就报错）。在局部测试中，它也完全符合人类的要求。​
+这段代码编译完全通过，且非常符合人类直觉（入口处先检查限流，失败就拒绝）。在针对“令牌不足”的局部测试中，它也完全符合人类的要求。
 
-但实际上，Agent 埋下了一颗静默崩溃的炸弹：由于 Agent 缺乏全局的工程上下文（它没有意识到 self.active_conns += 1; 已经发生在这个提前返回（Early Return）之前），当底层分配失败时，acquire 返回了 Err。由于返回了错误，外部调用方根本拿不到 conn_id，自然也就永远不会调用 release()。
+但实际上，Agent 埋下了一颗静默崩溃的炸弹：由于 Agent 缺乏对跨模块协议的全局理解，它完全没有意识到 `RateLimiter` 采用“预扣”设计——`check_limit` 已经将令牌数减 1。当后续业务逻辑因 `UserNotFound`、`fetch_data` 失败等原因返回错误时，已经扣减的令牌永远不会被回滚。外部调用方只是拿到了一个业务错误，根本不知道需要调用 `rollback_limit`。
 
-结果就是：每次分配失败，都会导致 active_conns 计数器永久性 +1（状态泄漏）。运行一段时间后，活跃连接数会被虚假的失败请求占满，整个系统陷入死锁，再也无法处理新请求。
+结果就是：每一次业务错误都会导致令牌永久丢失。随着时间推移，令牌池被虚假的失败请求耗尽，合法请求全部被拒绝，整个系统陷入“伪死锁”，再也无法正常服务。
 
 ## SCOPE: 消除空隙的引擎
 
