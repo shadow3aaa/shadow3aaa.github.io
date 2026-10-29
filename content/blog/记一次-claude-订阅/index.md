@@ -2,7 +2,7 @@
 title: 记一次 Claude 订阅
 date: 2026-10-28T20:44:00+08:00
 slug: how-do-I-get-claude
-draft: true
+draft: false
 ---
 
 最近买了 gpt 的 pro 订阅（5x挡位的），发现这玩意虽然天天重置怎么还是用的那么快。正好今天忙着谈恋爱的 tibo 又又又在他那28day计划里没活了进行重置，对额度总量进行一个测算。
@@ -33,7 +33,7 @@ codex 能直接读取重置以来使用的 token 数量，考虑到我仅用了6
 
 ## 购买 VPS
 
-这里刚好 [cloudcone 在打折](https://hello.cloudcone.com/halloween-vps-sale-2026/)。购买他们的 Frankenstein-26-SSD-VPS-1 机器，一年仅需 20.25$。虽然内存仅 1.25g ，但是对反代绰绰有余了。
+写这篇文章的时候刚好 [cloudcone 在打折](https://hello.cloudcone.com/halloween-vps-sale-2026/)。购买他们的 Frankenstein-26-SSD-VPS-1 机器，一年仅需 20.25$。虽然内存仅 1.25g ，但是对反代绰绰有余了。
 
 我使用国内的 mastercard 购买的，不过他们支持支付宝，并未尝试是否可以正常使用。开好机器后，他们会给你发邮件，里面包含vps的密码。
 
@@ -48,7 +48,7 @@ IP 这边的方案我没有直接购买家宽的 vps，因为这种 vps 的价�
 3. 订阅周期（SELECT SUBSCRIPTION PLAN）按需选择，考虑到订阅的特性，一半选 30 days。
 4. 代理地区（CHOOSE LOCATION）：选择 United States。当然。
 5. 欺诈评分（CHOOSE FRAUD SCORE）：选择Premium。这个会要求多支付 35% 的费用，但是显而易见应该选择。
-5. EXTRAS **重点！** 强烈建议勾选Add extra requirements。需要多支付 30% 费用。但是你可以人工写对 ip 的要求。这能得到更好的 IP。具体的要求可以参考下面的。
+6. EXTRAS **重点！** 强烈建议勾选Add extra requirements。需要多支付 30% 费用。但是你可以人工写对 ip 的要求。这能得到更好的 IP。具体的要求可以参考下面的。
 
 ```text
 Target: Clean US Residential/ISP IP.
@@ -61,4 +61,44 @@ Requirements: Native status on Ping0.cc & IPinfo; IP2Location: ISP Fixed Line, v
 
 ## 配置
 
-在 VPS 上配置好代理（推荐直接sing-box走全局了，反正反代没啥大流量也没什么带宽需求）。
+在 VPS 上配置好代理（推荐直接sing-box走全局了，反正反代没啥大流量也没什么带宽需求）。注意 ISP 代理只支持同时有**一个连接**，这也是为什么还是推荐同时买 VPS 和代理，这样就能让 VPS 做中转代理，VPS自己全局走 ISP 的同时导出个 socks5 给别的设备连。注意能不能直连 VPS 还是得看运气，如果不行，就再套娃个代理链。
+
+## 账号
+
+以上都只是配置跑反代的环境。claude 的检测重点还是在于账号。以下列几种获取方式和相关链接。
+
+## 反代程序
+
+反代程序的本质就是复刻cc客户端的行为，然后再导出个出口做api。可以用 [sub2api](https://github.com/Wei-Shaw/sub2api) 、[CPA](https://github.com/router-for-me/CLIProxyAPI) 等知名项目。我这里是使用的自己的反代程序 `ferryman` 以完全复刻最新 claude code 的行为（并不是说上面两个就不对齐了，只是我想对齐最新版本），暂不公开，如果需要可以联系我。
+
+### 官网
+
+即在官网自己完成注册并且绑定美国信用卡支付。如果可以，这自然是最优的办法。
+
+**注意不要自作聪明的在 VPS 的浏览器上注册**。如果 vps 是无头的，这很容易被检测（检测方法推测为没有 gpu 跑不了 webgpu 即可发现）。最好如我上面的说的一样走 VPS 中转的 ISP 代理。包括登陆也应该如此。
+
+关于 claude 对浏览器的检测。[这里有个神秘网站可以大致评估](https://newtv-ai.github.io/CLAUDE-SHIELD/)，虽然说不要太相信，不过如果它都能发现的明显问题，还是应该先解决了再注册。
+
+首先必须使用合适的邮箱。gmail、icloud为最优，但是白号不行，最好是自己的常用的号。别的邮箱可以考虑 <https://navigator-bs.gmx.es>。但是他们的号我没有自己注册过，不清楚新号的情况如何。
+
+正如前面的 vps 和 isp 直接给出链接，我并不吝啬于推荐任何平台。但是...关于虚拟卡支付，我确实并不了解，这里就不描述了。
+
+### Google Play & Apple Pay
+
+你很可能看过 Apple 从 A\ 手里抢钱退款的梗图了，显然，使用 Apple Pay 的好处是被封号了可以轻易退款。而 Google Play，并非不可能，不过退款概率没那么高。
+
+使用这两种方式的要求和官网一样。依然还是白号不行，最好是自己的常用的号。其中 Apple Pay 更为严苛（指 Apple 账号本身）。建议使用老号或者起码绑定支付方式 / 充了礼品卡几天的干净新号。
+
+Google Play的好处则是支付方式非常自由，你可以绑定国内的 master card / visa 卡，对礼品卡也没 Apple 卡的那么死（不过依然有概率让你验证的）。
+
+如果需要使用礼品卡来支付，可以用这个平台 [seagm](https://www.seagm.com/zh-my/google-play-gift-card-united-states)。当然，我并不清楚它是否最优或者最便宜。
+
+注意用来支付 claude 的手机需要能过 play 完整性验证，claude app 会检测这个。如果你玩安卓 root，就会清楚我在说什么。不要充了礼品卡才发现没法用，也不要问我为什么会知道 :(
+
+### 淘宝/咸鱼，启动
+
+如果上述方法还是太困难了。或者你发现自己搞半天花费远超直接买个号，可以直接去这些网购平台买一个。目前市场价格一个pro号大概在 160-200rmb，不过有售后保30天什么的...梦里想想吧。
+
+## 要说英文吗
+
+仅从社区调查看来，似乎语言和风控具备0个关系？显然，并不是只有中国大陆使用简体中文作为主要语言，这似乎没什么需要担心的。
